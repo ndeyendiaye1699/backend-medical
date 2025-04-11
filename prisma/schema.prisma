@@ -1,0 +1,57 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  role       String   @default("user") 
+  nom        String   // ajoute ce champ
+  specialite String?  // ajoute ce champ aussi
+  telephone  String?
+  adresse    String?
+  createdAt  DateTime @default(now())
+  consultations  Consultation[]   @relation("UserConsultations")
+}
+
+
+model Patient {
+  id             Int            @id @default(autoincrement())
+  nom            String
+  prenom         String
+  dateNaissance  DateTime
+  adresse        String
+  telephone      String
+  email          String?        @unique
+  sexe           String
+  groupeSanguin  String
+  antécédents    String?
+  consultations  Consultation[] // Relation avec les consultations
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+
+model Consultation {
+  id              Int       @id @default(autoincrement())
+  patientId       Int
+  userId          Int?
+  motif           String
+  diagnostic      String
+  traitement      String
+  dateConsultation DateTime @default(now())
+
+  patient         Patient   @relation(fields: [patientId], references: [id])
+  doctor User? @relation("UserConsultations", fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([userId, dateConsultation]) // Contrainte d'unicité pour empêcher les doublons de rendez-vous pour un même médecin
+}
