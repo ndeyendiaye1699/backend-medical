@@ -12,5 +12,7 @@ router.put('/:id', consultationController.updateConsultation); // PUT pour mettr
 
 // Supprimer une consultation
 router.delete('/:id', consultationController.deleteConsultation); // DELETE pour supprimer une consultation
+// Récupérer toutes les consultations
+router.get('/', consultationController.getAllConsultations);
 
 module.exports = router;

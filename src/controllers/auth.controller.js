@@ -69,3 +69,76 @@ exports.login = async (req, res) => {
     return res.status(500).json({ message: 'Erreur serveur' });
   }
 };
+// Mise à jour des informations utilisateur
+exports.updateUser = async (req, res) => {
+  const { userId } = req.user; // Récupéré du middleware d'authentification
+  const { nom, email, password, telephone, adresse } = req.body;
+
+  try {
+    // Préparer les données à mettre à jour
+    const updateData = {};
+    
+    if (nom) updateData.nom = nom;
+    if (email) updateData.email = email;
+    if (telephone) updateData.telephone = telephone;
+    if (adresse) updateData.adresse = adresse;
+
+    // Si le mot de passe est fourni, le hasher
+    if (password && password.trim() !== '') {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    // Mettre à jour l'utilisateur
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        nom: true,
+        role: true,
+        telephone: true,
+        adresse: true,
+        // Exclure le mot de passe des données renvoyées
+      }
+    });
+
+    return res.status(200).json({ 
+      message: 'Profil mis à jour avec succès', 
+      user: updatedUser 
+    });
+  } catch (error) {
+    console.error(error);
+    if (error.code === 'P2002') {
+      return res.status(400).json({ message: 'Cet email est déjà utilisé' });
+    }
+    return res.status(500).json({ message: 'Erreur lors de la mise à jour du profil' });
+  }
+};
+exports.getCurrentUser = async (req, res) => {
+  const { userId } = req.user; // Récupéré du middleware d'authentification
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        nom: true,
+        role: true,
+        telephone: true,
+        adresse: true,
+        // Exclure le mot de passe des données renvoyées
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
