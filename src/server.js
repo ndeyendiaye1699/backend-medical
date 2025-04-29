@@ -6,7 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const patientRoutes = require('./routes/patientRoutes');
 const consultationRoutes = require('./routes/consultation.routes');
 const rendezvousRoutes = require('./routes/rendezvous.routes');
-
+const factureRoutes = require('./routes/factureRoutes');
 const app = express();
 
 app.use(cors()); // ← APPLIQUÉ EN PREMIER
@@ -17,7 +17,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/consultations', consultationRoutes);
 app.use('/api/rendezvous', rendezvousRoutes);
-
+app.use('/api/factures', factureRoutes);
 // Port
 const PORT = process.env.PORT || 5000;
 

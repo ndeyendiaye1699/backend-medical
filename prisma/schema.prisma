@@ -52,6 +52,14 @@ model Consultation {
   doctor User? @relation("UserConsultations", fields: [userId], references: [id])
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-
+  facture          Facture?      @relation
   @@unique([userId, dateConsultation]) // Contrainte d'unicité pour empêcher les doublons de rendez-vous pour un même médecin
+}
+model Facture {
+  id               Int           @id @default(autoincrement())
+  consultationId   Int           @unique
+  montant          Float
+  dateEmission     DateTime      @default(now())
+  statut           String        @default("non payée") // ou "payée", selon ta logique
+  consultation     Consultation  @relation(fields: [consultationId], references: [id])
 }
