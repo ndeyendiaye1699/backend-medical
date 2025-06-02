@@ -1,65 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
-  role       String   @default("user") 
-  nom        String   // ajoute ce champ
-  specialite String?  // ajoute ce champ aussi
-  telephone  String?
-  adresse    String?
-  createdAt  DateTime @default(now())
-  consultations  Consultation[]   @relation("UserConsultations")
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password      String
+  role          String         @default("user")
+  createdAt     DateTime       @default(now())
+  nom           String
+  specialite    String?
+  adresse       String?
+  telephone     String?
+  consultations Consultation[] @relation("UserConsultations")
 }
-
 
 model Patient {
-  id             Int            @id @default(autoincrement())
-  nom            String
-  prenom         String
-  dateNaissance  DateTime
-  adresse        String
-  telephone      String
-  email          String?        @unique
-  sexe           String
-  groupeSanguin  String
-  antécédents    String?
-  consultations  Consultation[] // Relation avec les consultations
-
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id            Int            @id @default(autoincrement())
+  nom           String
+  prenom        String
+  dateNaissance DateTime
+  createdAt     DateTime       @default(now())
+  adresse       String
+  antécédents String?
+  email         String?        @unique
+  groupeSanguin String
+  sexe          String
+  telephone     String
+  updatedAt     DateTime       @updatedAt
+  consultations Consultation[]
 }
-
 
 model Consultation {
-  id              Int       @id @default(autoincrement())
-  patientId       Int
-  userId          Int?
-  motif           String
-  diagnostic      String
-  traitement      String
+  id               Int      @id @default(autoincrement())
+  patientId        Int
+  motif            String
+  diagnostic       String
+  traitement       String
   dateConsultation DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  userId           Int?
+  patient          Patient  @relation(fields: [patientId], references: [id])
+  doctor           User?    @relation("UserConsultations", fields: [userId], references: [id])
+  facture          Facture?
 
-  patient         Patient   @relation(fields: [patientId], references: [id])
-  doctor User? @relation("UserConsultations", fields: [userId], references: [id])
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  facture          Facture?      @relation
-  @@unique([userId, dateConsultation]) // Contrainte d'unicité pour empêcher les doublons de rendez-vous pour un même médecin
+  @@unique([userId, dateConsultation])
 }
+
 model Facture {
-  id               Int           @id @default(autoincrement())
-  consultationId   Int           @unique
-  montant          Float
-  dateEmission     DateTime      @default(now())
-  statut           String        @default("non payée") // ou "payée", selon ta logique
-  consultation     Consultation  @relation(fields: [consultationId], references: [id])
+  id             Int          @id @default(autoincrement())
+  consultationId Int          @unique
+  montant        Float
+  dateEmission   DateTime     @default(now())
+  statut         String       @default("non payée")
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
 }

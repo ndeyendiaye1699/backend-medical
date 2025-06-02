@@ -39,7 +39,6 @@ exports.login = async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(400).json({ message: 'Email ou mot de passe incorrect' });
     }
-
     const token = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_SECRET,
@@ -130,5 +129,25 @@ exports.getAllUsers = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur lors de la récupération des utilisateurs' });
+  }
+};
+exports.getAllDoctors = async (req, res) => {
+  try {
+    const doctors = await prisma.user.findMany({
+      where: { role: 'doctor' },
+      select: {
+        id: true,
+        email: true,
+        nom: true,
+        specialite: true,
+        telephone: true,
+        adresse: true,
+      },
+    });
+
+    res.status(200).json({ doctors });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des médecins' });
   }
 };
